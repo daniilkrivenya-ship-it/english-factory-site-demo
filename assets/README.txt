@@ -1,0 +1,11 @@
+АКРОБАТ — КУДА ПОЛОЖИТЬ ШРИФТЫ
+
+Добавьте сюда лицензионные web-файлы с точными именами:
+- Akrobat-Regular.woff2
+- Akrobat-SemiBold.woff2
+- Akrobat-ExtraBold.woff2
+
+Если у вас называются иначе, либо переименуйте их, либо измените пути в assets/css/styles.css.
+Пока файлов нет, сайт автоматически использует системный запасной шрифт.
+
+Социальные иконки: assets/images/social/telegram.svg, whatsapp.svg, vk.svg, youtube.svg
