@@ -2556,3 +2556,34 @@ a.contact-card:hover { transform: translateY(-2px); border-color: rgba(160,28,23
   letter-spacing: .02em;
   color: currentColor;
 }
+
+
+/* ===== Live application form — 2026-08-03 ===== */
+.form-honeypot {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+.contact-box[aria-busy="true"] {
+  cursor: wait;
+}
+.demo-form-status.is-pending {
+  background: var(--soft-blue);
+  color: #24547f;
+}
+.demo-form-status.is-success {
+  background: #eaf6ee;
+  color: #23623a;
+  border: 1px solid rgba(35, 98, 58, .16);
+}
+.demo-form-status.is-error {
+  background: #fbeceb;
+  color: #8a241f;
+  border: 1px solid rgba(138, 36, 31, .16);
+}

@@ -138,6 +138,7 @@
   const comment = document.getElementById('comment');
   const commentHint = document.getElementById('commentHint');
   const status = document.getElementById('formStatus');
+  const applicationEndpoint = 'https://script.google.com/macros/s/AKfycbzwe7m82M30meKpxDOOy7XsPfPnPpYPuzE91GJ63Obd70AwrzlcepzUlHhAkvb1-TeI/exec';
 
   window.updateFormState = () => {
     if (!form || !submit) return;
@@ -155,16 +156,58 @@
       }));
     });
     updateFormState();
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
       updateFormState();
+
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
       }
+
+      const originalLabel = submit.textContent;
+      submit.disabled = true;
+      submit.textContent = 'Отправляем…';
+      form.setAttribute('aria-busy', 'true');
+
       if (status) {
-        status.textContent = 'Форма заполнена корректно. Отправка в Google Таблицу будет подключена перед публикацией сайта.';
-        status.classList.add('is-visible');
+        status.textContent = 'Отправляем заявку…';
+        status.classList.remove('is-success', 'is-error');
+        status.classList.add('is-visible', 'is-pending');
+      }
+
+      try {
+        const payload = new URLSearchParams();
+        new FormData(form).forEach((value, key) => payload.append(key, String(value)));
+
+        // Apps Script отвечает с другого домена, поэтому используем no-cors.
+        // Форма уже проверена в браузере, а сервер дополнительно валидирует данные.
+        await fetch(applicationEndpoint, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: payload,
+          keepalive: true
+        });
+
+        form.reset();
+        form.querySelectorAll('[aria-invalid="true"]').forEach((field) => field.removeAttribute('aria-invalid'));
+
+        if (status) {
+          status.textContent = 'Заявка отправлена. Мы свяжемся с вами в ближайшее время.';
+          status.classList.remove('is-pending', 'is-error');
+          status.classList.add('is-visible', 'is-success');
+        }
+      } catch (error) {
+        console.error('Не удалось отправить заявку:', error);
+        if (status) {
+          status.textContent = 'Не удалось отправить заявку. Проверьте подключение к интернету и попробуйте ещё раз.';
+          status.classList.remove('is-pending', 'is-success');
+          status.classList.add('is-visible', 'is-error');
+        }
+      } finally {
+        form.removeAttribute('aria-busy');
+        submit.textContent = originalLabel;
+        updateFormState();
       }
     });
   }
