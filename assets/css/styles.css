@@ -2751,3 +2751,142 @@ a.contact-card:hover { transform: translateY(-2px); border-color: rgba(160,28,23
   .team-tags { gap: 6px; margin-top: 12px; }
   .team-tag { padding: 6px 9px; font-size: 11.5px; }
 }
+
+
+/* ===== Team-card chip spacing and wording refinement — 2026-08-04 ===== */
+/* Keep a clear breathing space between the competency chips and the footer divider. */
+.team-meta {
+  margin-bottom: 20px;
+}
+
+.team-summary-footer {
+  flex-shrink: 0;
+}
+
+/* The expanded header uses a horizontal layout, so it does not need the extra bottom gap. */
+.team-card[open] .team-meta {
+  margin-bottom: 0;
+}
+
+@media (max-width: 680px) {
+  .team-meta {
+    margin-bottom: 18px;
+  }
+
+  .team-card[open] .team-meta {
+    margin-bottom: 0;
+  }
+}
+
+
+/* ===== Final team-chip colors, course borders and optical toggle centering — 2026-08-04 ===== */
+
+/* Anna's four chips are intentionally locked into exactly two rows. */
+.team-tags--fixed {
+  display: grid;
+  gap: 7px;
+}
+
+.team-tags--fixed .team-tags-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 7px;
+  min-width: 0;
+}
+
+.team-tags--fixed .team-tag {
+  white-space: nowrap;
+}
+
+/* Team palette: Anna — red, Elena — purple, Daniil — blue. */
+.team-card:nth-child(1) .team-tag {
+  border-color: rgba(160, 28, 23, .16);
+  background: var(--soft-red);
+  color: var(--red);
+}
+
+.team-card:nth-child(2) .team-tag {
+  border-color: var(--support-border, #dcc6d0);
+  background: var(--soft-support, #f3e9ed);
+  color: var(--support, #703d54);
+}
+
+.team-card:nth-child(3) .team-tag {
+  border-color: rgba(89, 145, 203, .20);
+  background: var(--soft-blue);
+  color: #24547f;
+}
+
+/* All three course-format chips now use the same outlined visual language. */
+.course-format-chips .format-chip {
+  border: 1px solid transparent;
+}
+
+.course-format-chips .chip-group {
+  border-color: rgba(160, 28, 23, .16);
+}
+
+.course-format-chips .chip-individual {
+  border-color: rgba(89, 145, 203, .20);
+}
+
+.course-format-chips .chip-support {
+  border-color: var(--support-border, #dcc6d0);
+}
+
+/* Draw plus/minus signs from geometric lines instead of font glyphs. */
+.course-toggle,
+.team-toggle {
+  position: relative;
+  font-size: 0;
+  line-height: 0;
+}
+
+.course-toggle::before,
+.course-toggle::after,
+.team-toggle::before,
+.team-toggle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.course-toggle::after,
+.team-toggle::after {
+  width: 2px;
+  height: 14px;
+}
+
+.course-card[open] .course-toggle::before,
+.team-card[open] .team-toggle::before {
+  content: "";
+  width: 14px;
+  height: 2px;
+  transform: translate(-50%, -50%);
+}
+
+.course-card[open] .course-toggle::after,
+.team-card[open] .team-toggle::after {
+  content: "";
+  display: none;
+}
+
+/* Compact fallback for very narrow phones while preserving Anna's two rows. */
+@media (max-width: 390px) {
+  .team-tags--fixed,
+  .team-tags--fixed .team-tags-row {
+    gap: 5px;
+  }
+
+  .team-tags--fixed .team-tag {
+    padding: 5px 7px;
+    font-size: 10.5px;
+    letter-spacing: 0;
+  }
+}
