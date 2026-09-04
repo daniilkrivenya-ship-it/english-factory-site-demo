@@ -136,6 +136,7 @@
   const submit = document.getElementById('submitApplication');
   const status = document.getElementById('formStatus');
   const applicationEndpoint = 'https://script.google.com/macros/s/AKfycbzwe7m82M30meKpxDOOy7XsPfPnPpYPuzE91GJ63Obd70AwrzlcepzUlHhAkvb1-TeI/exec';
+  const mirrorEndpoint = 'https://englishfactory.ru/api/lead.php';
 
   const inferContactDetails = (value) => {
     const contact = value.trim();
