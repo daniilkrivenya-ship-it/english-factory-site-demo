@@ -200,14 +200,51 @@
 
         // Apps Script отвечает с другого домена, поэтому используем no-cors.
         // Форма уже проверена в браузере, а сервер дополнительно валидирует данные.
-        await fetch(applicationEndpoint, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: payload,
-          keepalive: true
-        });
+await fetch(applicationEndpoint, {
+  method: 'POST',
+  mode: 'no-cors',
+  body: payload,
+  keepalive: true
+});
 
-        form.reset();
+// Параллельная копия заявки в российскую БД.
+// Ошибка зеркала не влияет на основную отправку в Google.
+const contactDetails = inferContactDetails(
+  document.getElementById('contact-field')?.value || ''
+);
+
+const params = new URLSearchParams(window.location.search);
+
+const mirrorPayload = {
+  source: 'school',
+  form_name: 'application',
+  name: document.getElementById('name')?.value || '',
+  contact: document.getElementById('contact-field')?.value || '',
+  phone: contactDetails.phone,
+  email: contactDetails.email,
+  goal: document.getElementById('direction')?.value || '',
+  landing_url: window.location.href,
+  referrer: document.referrer || '',
+  utm_source: params.get('utm_source') || '',
+  utm_medium: params.get('utm_medium') || '',
+  utm_campaign: params.get('utm_campaign') || '',
+  utm_content: params.get('utm_content') || '',
+  utm_term: params.get('utm_term') || '',
+  consent_given: document.getElementById('privacyConsent')?.checked === true,
+  consent_version: '2026-09-04',
+  website: ''
+};
+
+fetch(mirrorEndpoint, {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify(mirrorPayload),
+  keepalive: true
+}).catch((error) => {
+  console.warn('Не удалось сохранить копию заявки в резервную БД:', error);
+});
+
+form.reset();
         form.querySelectorAll('[aria-invalid="true"]').forEach((field) => field.removeAttribute('aria-invalid'));
 
         if (status) {
