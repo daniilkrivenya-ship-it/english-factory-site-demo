@@ -159,6 +159,98 @@
     document.getElementById('legacyContactMethod').value = details.method;
     document.getElementById('legacyComment').value = details.comment;
   };
+  const createRequestId = () => {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+    /[xy]/g,
+    (char) => {
+      const random = Math.random() * 16 | 0;
+      const value = char === 'x'
+        ? random
+        : (random & 0x3) | 0x8;
+
+      return value.toString(16);
+    }
+  );
+};
+
+const wait = (ms) => new Promise(
+  (resolve) => window.setTimeout(resolve, ms)
+);
+
+const saveLeadToMysql = async (mirrorPayload) => {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const controller = new AbortController();
+
+    const timeout = window.setTimeout(
+      () => controller.abort(),
+      8000
+    );
+
+    try {
+      const response = await fetch(mirrorEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(mirrorPayload),
+        signal: controller.signal,
+        keepalive: true
+      });
+
+      const result = await response
+        .json()
+        .catch(() => null);
+
+      if (response.ok && result?.ok === true) {
+        return result;
+      }
+
+      const error = new Error(
+        result?.error ||
+        `MySQL API returned HTTP ${response.status}`
+      );
+
+      if (
+        response.status >= 400 &&
+        response.status < 500
+      ) {
+        throw Object.assign(
+          error,
+          { noRetry: true }
+        );
+      }
+
+      lastError = error;
+
+    } catch (error) {
+      lastError = error;
+
+      if (error?.noRetry) {
+        throw error;
+      }
+
+    } finally {
+      window.clearTimeout(timeout);
+    }
+
+    if (attempt < 3) {
+      await wait(
+        attempt === 1
+          ? 600
+          : 1500
+      );
+    }
+  }
+
+  throw lastError ||
+    new Error('Не удалось сохранить заявку.');
+};
 
   window.updateFormState = () => {
     if (!form || !submit) return;
@@ -198,51 +290,86 @@
         const payload = new URLSearchParams();
         new FormData(form).forEach((value, key) => payload.append(key, String(value)));
 
-        // Apps Script отвечает с другого домена, поэтому используем no-cors.
-        // Форма уже проверена в браузере, а сервер дополнительно валидирует данные.
-await fetch(applicationEndpoint, {
-  method: 'POST',
-  mode: 'no-cors',
-  body: payload,
-  keepalive: true
-});
-
-// Параллельная копия заявки в российскую БД.
-// Ошибка зеркала не влияет на основную отправку в Google.
-const contactDetails = inferContactDetails(
+        const contactDetails = inferContactDetails(
   document.getElementById('contact-field')?.value || ''
 );
 
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(
+  window.location.search
+);
+
+const requestId = createRequestId();
 
 const mirrorPayload = {
+  request_id: requestId,
   source: 'school',
   form_name: 'application',
-  name: document.getElementById('name')?.value || '',
-  contact: document.getElementById('contact-field')?.value || '',
+
+  name:
+    document.getElementById('name')?.value || '',
+
+  contact:
+    document.getElementById('contact-field')?.value || '',
+
   phone: contactDetails.phone,
   email: contactDetails.email,
-  goal: document.getElementById('direction')?.value || '',
+
+  goal:
+    document.getElementById('direction')?.value || '',
+
   landing_url: window.location.href,
   referrer: document.referrer || '',
-  utm_source: params.get('utm_source') || '',
-  utm_medium: params.get('utm_medium') || '',
-  utm_campaign: params.get('utm_campaign') || '',
-  utm_content: params.get('utm_content') || '',
-  utm_term: params.get('utm_term') || '',
-  consent_given: document.getElementById('privacyConsent')?.checked === true,
+
+  utm_source:
+    params.get('utm_source') || '',
+
+  utm_medium:
+    params.get('utm_medium') || '',
+
+  utm_campaign:
+    params.get('utm_campaign') || '',
+
+  utm_content:
+    params.get('utm_content') || '',
+
+  utm_term:
+    params.get('utm_term') || '',
+
+  consent_given:
+    document.getElementById('privacyConsent')
+      ?.checked === true,
+
   consent_version: '2026-09-04',
+
   website: ''
 };
 
-fetch(mirrorEndpoint, {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify(mirrorPayload),
-  keepalive: true
-}).catch((error) => {
-  console.warn('Не удалось сохранить копию заявки в резервную БД:', error);
-});
+/*
+ * MySQL теперь является обязательной записью.
+ * При временной ошибке выполняются до 3 попыток
+ * с одним и тем же request_id.
+ */
+await saveLeadToMysql(mirrorPayload);
+
+/*
+ * Google временно оставляем резервным каналом.
+ * Его ошибка больше не может потерять заявку,
+ * потому что к этому моменту она уже находится
+ * в нашей базе.
+ */
+try {
+  await fetch(applicationEndpoint, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: payload,
+    keepalive: true
+  });
+} catch (googleError) {
+  console.warn(
+    'Заявка сохранена в CRM, но резервная отправка в Google не удалась:',
+    googleError
+  );
+}
 
 form.reset();
         form.querySelectorAll('[aria-invalid="true"]').forEach((field) => field.removeAttribute('aria-invalid'));
