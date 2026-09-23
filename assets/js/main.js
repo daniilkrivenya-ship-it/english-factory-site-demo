@@ -135,6 +135,7 @@
   const form = document.getElementById('applicationForm');
   const submit = document.getElementById('submitApplication');
   const status = document.getElementById('formStatus');
+  const applicationEndpoint = 'https://script.google.com/macros/s/AKfycbzwe7m82M30meKpxDOOy7XsPfPnPpYPuzE91GJ63Obd70AwrzlcepzUlHhAkvb1-TeI/exec';
   const mirrorEndpoint = 'https://englishfactory.ru/api/lead.php';
 
   const inferContactDetails = (value) => {
@@ -251,6 +252,49 @@ const saveLeadToMysql = async (mirrorPayload) => {
     new Error('Не удалось сохранить заявку.');
 };
 
+const sendGoogleBackup = (payload) => {
+  const body = payload.toString();
+
+  try {
+    if (
+      navigator.sendBeacon &&
+      navigator.sendBeacon(
+        applicationEndpoint,
+        new Blob(
+          [body],
+          {
+            type:
+              'application/x-www-form-urlencoded;charset=UTF-8'
+          }
+        )
+      )
+    ) {
+      return;
+    }
+  } catch (error) {
+    console.warn(
+      'sendBeacon для Google backup не сработал:',
+      error
+    );
+  }
+
+  fetch(applicationEndpoint, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type':
+        'application/x-www-form-urlencoded;charset=UTF-8'
+    },
+    body,
+    keepalive: true
+  }).catch((error) => {
+    console.warn(
+      'CRM сохранена, но Google backup не отправился:',
+      error
+    );
+  });
+};
+
   window.updateFormState = () => {
     if (!form || !submit) return;
     submit.disabled = !form.checkValidity();
@@ -340,7 +384,7 @@ const mirrorPayload = {
 
   consent_version: '2026-09-04',
 
-  client_version: 'school-20260923-1',
+  client_version: 'school-20260923-2',
 
   website: ''
 };
@@ -353,10 +397,12 @@ const mirrorPayload = {
 await saveLeadToMysql(mirrorPayload);
 
 /*
- * После успешного INSERT сервер сам отправляет
- * резервную копию в Google/Telegram. Браузер больше
- * не синхронизирует два независимых бэкенда.
+ * CRM уже подтверждена сервером и является
+ * источником истины. Google/Telegram отправляем
+ * после этого в режиме fire-and-forget, чтобы
+ * их задержки никогда не влияли на сохранение заявки.
  */
+sendGoogleBackup(payload);
 
 form.reset();
         form.querySelectorAll('[aria-invalid="true"]').forEach((field) => field.removeAttribute('aria-invalid'));
