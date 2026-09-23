@@ -1,5 +1,33 @@
 
 (() => {
+  const params = new URLSearchParams(window.location.search);
+  const leadResult = params.get('lead');
+  const status = document.getElementById('formStatus');
+
+  if (!status || !leadResult) return;
+
+  if (leadResult === 'ok') {
+    status.textContent = 'Заявка отправлена. Мы свяжемся с вами в ближайшее время.';
+    status.classList.remove('is-pending', 'is-error');
+    status.classList.add('is-visible', 'is-success');
+  } else if (leadResult === 'error') {
+    status.textContent = 'Не удалось отправить заявку. Попробуйте ещё раз или свяжитесь с нами напрямую.';
+    status.classList.remove('is-pending', 'is-success');
+    status.classList.add('is-visible', 'is-error');
+  }
+
+  if (window.history?.replaceState) {
+    params.delete('lead');
+    const query = params.toString();
+    const cleanUrl =
+      window.location.pathname +
+      (query ? '?' + query : '') +
+      window.location.hash;
+    window.history.replaceState({}, '', cleanUrl);
+  }
+})();
+
+(() => {
   const docs = Array.from(document.querySelectorAll('.doc'));
   const lightbox = document.getElementById('docLightbox');
   if (!docs.length || !lightbox) return;
