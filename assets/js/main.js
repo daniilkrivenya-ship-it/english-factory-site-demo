@@ -135,7 +135,6 @@
   const form = document.getElementById('applicationForm');
   const submit = document.getElementById('submitApplication');
   const status = document.getElementById('formStatus');
-  const applicationEndpoint = 'https://script.google.com/macros/s/AKfycbzwe7m82M30meKpxDOOy7XsPfPnPpYPuzE91GJ63Obd70AwrzlcepzUlHhAkvb1-TeI/exec';
   const mirrorEndpoint = 'https://englishfactory.ru/api/lead.php';
 
   const inferContactDetails = (value) => {
@@ -341,6 +340,8 @@ const mirrorPayload = {
 
   consent_version: '2026-09-04',
 
+  client_version: 'school-20260923-1',
+
   website: ''
 };
 
@@ -352,24 +353,10 @@ const mirrorPayload = {
 await saveLeadToMysql(mirrorPayload);
 
 /*
- * Google временно оставляем резервным каналом.
- * Его ошибка больше не может потерять заявку,
- * потому что к этому моменту она уже находится
- * в нашей базе.
+ * После успешного INSERT сервер сам отправляет
+ * резервную копию в Google/Telegram. Браузер больше
+ * не синхронизирует два независимых бэкенда.
  */
-try {
-  await fetch(applicationEndpoint, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: payload,
-    keepalive: true
-  });
-} catch (googleError) {
-  console.warn(
-    'Заявка сохранена в CRM, но резервная отправка в Google не удалась:',
-    googleError
-  );
-}
 
 form.reset();
         form.querySelectorAll('[aria-invalid="true"]').forEach((field) => field.removeAttribute('aria-invalid'));
