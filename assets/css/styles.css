@@ -41,14 +41,13 @@
       --shadow-soft: 0 16px 46px rgba(42, 31, 24, .075), 0 0 28px rgba(255,255,255,.42);
       --container: 1160px;
       --font: Akrobat, "Akrobat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      --text-font: Arial, "Helvetica Neue", sans-serif;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: var(--text-font);
+      font-family: var(--font);
       color: var(--ink);
       background:
         radial-gradient(circle at 10% 8%, rgba(160, 28, 23, .20), transparent 30%),
@@ -59,7 +58,7 @@
         linear-gradient(180deg, #fff5f2 0%, #f7fbff 35%, #fff4f2 68%, #f4f9ff 100%);
       background-attachment: fixed;
       line-height: 1.5;
-      font-size: 17px;
+      font-size: 19px;
     }
 
     body::before {
@@ -1639,8 +1638,8 @@ body {
   --support: #2f8178;
   --soft-support: #eaf8f6;
 }
-h1, h2, h3, h4, h5, h6, .brand, button, .btn { font-family: var(--font); }
-input, select, textarea { font-family: var(--text-font); }
+button, input, select, textarea { font-family: var(--font); }
+.btn { font-family: var(--font); }
 
 /* Desktop header: one line, compact and stable */
 .nav { min-height: 96px; gap: 14px; }
