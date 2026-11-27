@@ -2902,10 +2902,6 @@ a.contact-card:hover { transform: translateY(-2px); border-color: rgba(160,28,23
   scroll-margin-top: 110px;
 }
 
-.pricing-group {
-  margin-top: 24px;
-}
-
 .pricing-section h3 {
   margin: 0;
   font-size: clamp(25px, 3vw, 33px);
@@ -2913,14 +2909,11 @@ a.contact-card:hover { transform: translateY(-2px); border-color: rgba(160,28,23
   letter-spacing: -.035em;
 }
 
-.pricing-group .pricing-subtitle {
-  margin-bottom: 14px;
-}
-
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+  margin-top: 24px;
 }
 
 .pricing-plan {
@@ -2945,14 +2938,12 @@ a.contact-card:hover { transform: translateY(-2px); border-color: rgba(160,28,23
   box-shadow: 0 10px 20px rgba(36, 84, 127, .18);
 }
 
-.pricing-plan h4 {
-  margin: 0;
+.pricing-grid h3 {
+  min-height: 2.16em;
   font-size: clamp(23px, 2.5vw, 30px);
   line-height: 1.08;
   letter-spacing: -.025em;
 }
-
-.pricing-grid h4 { min-height: 2.16em; }
 
 .pricing-cost {
   margin: 12px 0 0;
@@ -2997,8 +2988,8 @@ a.contact-card:hover { transform: translateY(-2px); border-color: rgba(160,28,23
 .pricing-individual {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
-  gap: clamp(18px, 3vw, 36px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .pricing-package { margin: 14px 0 8px; }
@@ -3032,11 +3023,9 @@ a.contact-card:hover { transform: translateY(-2px); border-color: rgba(160,28,23
   font-size: 14px;
 }
 
-.pricing-single {
-  align-self: center;
-  min-width: 0;
-  padding-left: clamp(18px, 3vw, 36px);
-  border-left: 1px solid #dbe4ec;
+.pricing-individual .btn {
+  align-self: flex-start;
+  margin-top: auto;
 }
 
 .pricing-single dl { margin: 8px 0 16px; }
@@ -3083,8 +3072,7 @@ a.contact-card:hover { transform: translateY(-2px); border-color: rgba(160,28,23
   .pricing-section,
   .pricing-section #directions { scroll-margin-top: 88px; }
   .pricing-grid, .pricing-individual { grid-template-columns: minmax(0, 1fr); }
-  .pricing-grid h4 { min-height: 0; }
-  .pricing-single { padding: 16px 0 0; border-left: 0; border-top: 1px solid #dbe4ec; }
+  .pricing-grid h3 { min-height: 0; }
   .pricing-club { grid-template-columns: minmax(0, 1fr); }
   .pricing-individual .btn, .pricing-club .btn { width: 100%; }
 }
