@@ -73,7 +73,6 @@
 
 (() => {
   const header = document.querySelector('.topbar');
-  const courseCards = Array.from(document.querySelectorAll('details.course-card'));
   const teamCards = Array.from(document.querySelectorAll('details.team-card'));
 
   const scrollCardIntoComfortableView = (card) => {
@@ -86,53 +85,24 @@
     }, 70);
   };
 
-  const directionsSection = document.getElementById('directions');
-  const scrollBackToDirections = () => {
-    window.setTimeout(() => {
-      const headerHeight = header?.getBoundingClientRect().height || 0;
-      const top = directionsSection ? window.scrollY + directionsSection.getBoundingClientRect().top - headerHeight - 12 : 0;
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-    }, 70);
-  };
-
-  courseCards.forEach((card) => card.addEventListener('toggle', () => {
-    if (card.open) {
-      courseCards.forEach((other) => {
-        if (other !== card && other.open) {
-          other.dataset.autoClosing = 'true';
-          other.open = false;
-        }
-      });
-      scrollCardIntoComfortableView(card);
-      return;
-    }
-
-    if (card.dataset.autoClosing === 'true') {
-      delete card.dataset.autoClosing;
-      return;
-    }
-    scrollBackToDirections();
-  }));
-
   // Team cards are intentionally independent: several can stay open at once.
   teamCards.forEach((card) => card.addEventListener('toggle', () => {
     if (card.open) scrollCardIntoComfortableView(card);
   }));
 
-  const direction = document.getElementById('direction');
-  document.querySelectorAll('.course-cta[data-direction]').forEach((link) => {
-    link.addEventListener('click', (event) => {
-      if (direction) direction.value = link.dataset.direction || '';
-      if (link.closest('summary')) {
-        event.preventDefault();
-        event.stopPropagation();
-        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-      window.setTimeout(() => updateFormState(), 0);
+})();
+
+(() => {
+  const form = document.getElementById('applicationForm');
+  const format = document.getElementById('format');
+  if (!form || !format) return;
+
+  document.querySelectorAll('a[data-format]').forEach((link) => {
+    link.addEventListener('click', () => {
+      format.value = link.dataset.format;
+      format.dispatchEvent(new Event('change'));
     });
   });
-
-  const form = document.getElementById('applicationForm');
   const submit = document.getElementById('submitApplication');
   const status = document.getElementById('formStatus');
   const applicationEndpoint = 'https://script.google.com/macros/s/AKfycbzwe7m82M30meKpxDOOy7XsPfPnPpYPuzE91GJ63Obd70AwrzlcepzUlHhAkvb1-TeI/exec';
@@ -332,6 +302,7 @@ const sendGoogleBackup = (payload) => {
         syncLegacyContactFields();
         const payload = new URLSearchParams();
         new FormData(form).forEach((value, key) => payload.append(key, String(value)));
+        payload.set('format', format.value);
 
         const contactDetails = inferContactDetails(
   document.getElementById('contact-field')?.value || ''
@@ -357,8 +328,7 @@ const mirrorPayload = {
   phone: contactDetails.phone,
   email: contactDetails.email,
 
-  goal:
-    document.getElementById('direction')?.value || '',
+  goal: format.value,
 
   landing_url: window.location.href,
   referrer: document.referrer || '',
@@ -384,7 +354,7 @@ const mirrorPayload = {
 
   consent_version: '2026-09-04',
 
-  client_version: 'school-20260923-2',
+  client_version: 'school-20261127-pricing',
 
   website: ''
 };
