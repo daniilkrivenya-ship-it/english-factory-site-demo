@@ -206,7 +206,7 @@
     .summary-text small { display: block; color: var(--muted); font-weight: 600; font-size: 14px; margin-top: 4px; }
     .chevron { width: 38px; height: 38px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); display: grid; place-items: center; transition: .18s ease; }
     details[open] .chevron { transform: rotate(180deg); }
-    .doc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 0 24px 24px; }
+    .doc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 0 24px 24px; }
     .doc { min-height: 230px; border-radius: 20px; border: 1px solid var(--line); background: linear-gradient(135deg, #fff 0%, #fbfcff 100%); padding: 14px; display: block; transition: .18s ease; cursor: zoom-in; }
     .doc:hover { transform: translateY(-2px); border-color: rgba(160, 28, 23, .22); }
     .doc-preview { height: 260px; border-radius: 14px; background: #fbf7f0; overflow: hidden; border: 1px solid var(--line); }
